@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <!-- Title -->
+    <title>My Homepage</title>
+
+    <!-- Encoding -->
+    <meta charset="UTF-8">
+
+    <!-- Icon -->
+    <link rel="icon" href="/images/favicon.ico">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Script to include header and footer -->
+    <script src="js/utils/include.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="/js/libs/jquery-3.4.1.min.js"> </script>
+    <script src="/js/libs/popper.min.js"> </script>
+    <script src="/js/libs/bootstrap.min.js"> </script>
+
+    <!-- JS of the header -->
+    <script src="/js/header.js" type="module"></script>
+
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div id="header"></div>
+
+    <div class="container mt-5">
+        <h1>Welcome to my homepage!</h1>
+        <p>This is the homepage for my website. You can find information about me, my interests, and my work on this
+            site.</p>
+        <h2>About me</h2>
+        <p>I am a web developer and I love building websites and web applications. I have been working in the tech
+            industry for several years and I am always looking for new and exciting projects to work on.</p>
+        <h2>My interests</h2>
+        <ul>
+            <li>Web development</li>
+            <li>Graphic design</li>
+            <li>Photography</li>
+        </ul>
+        <h2>Contact me</h2>
+        <p>If you would like to get in touch with me, you can send me an email at <a
+                href="mailto:myemail@example.com">myemail@example.com</a>.</p>
+    </div>
+
+    <!-- Script to load header -->
+    <script>
+        include("header.html", "#header");
+    </script>
+</body>
+
+</html>

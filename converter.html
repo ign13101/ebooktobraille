@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <!-- Title -->
+    <title>My Homepage</title>
+
+    <!-- Encoding -->
+    <meta charset="UTF-8">
+
+    <!-- Icon -->
+    <link rel="icon" href="/images/favicon.ico">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Script to include header and footer -->
+    <script src="js/utils/include.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="/js/libs/jquery-3.4.1.min.js"> </script>
+    <script src="/js/libs/popper.min.js"> </script>
+    <script src="/js/libs/bootstrap.min.js"> </script>
+
+    <!-- JS of the header -->
+    <script src="/js/header.js" type="module"></script>
+
+    <!-- JS of the form -->
+    <script src="/js/handleForm.js" type="module"></script>
+
+    <!-- Import the JSZip library -->
+    <script src="/js/libs/jszip.min.js"></script>
+    
+    <!-- Import Epub.js library -->
+    <script src="/js/libs/epub.min.js"></script>
+
+    <!-- Import FileSaver -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
+
+</head>
+
+<body>
+  
+    <!-- Header -->
+    <div id="header"></div>
+
+    <div class="container mt-5">
+        <h1 class="text-center">Welcome to my homepage!</h1>
+        <form id="form-ebook-upload">
+            <div class="form-group">
+                <label for="file">Sube tu libro en formato epub:</label>
+                <input required type="file" class="form-control" id="file" name="file">
+            </div>
+            <div class="row mb-3">
+                <div class="col-md text-center">
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Script to load header -->
+    <script>
+        include("header.html", "#header");
+    </script>
+</body>
+
+</html>
