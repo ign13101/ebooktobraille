@@ -12,31 +12,73 @@ function handleSubmitFile(event) {
     let form = event.target;
     let formData = new FormData(form);
     let file = formData.get("file");
-    // console.log(file);
     zip.loadAsync(file).then(function (unzippedFile) {
-        console.log("zip " + zip);
-        // it is necesary to check the version of the epub before converting it to text, they have different structures
-        // it is redundant to check for the OPS folder, it may instead appear as OEBPS, or not at all
-        // to check the version you need to look for the version attribute in the package tag in the .opf file
-        // version 2 epubs use html files, so you'll have to take that into account
+        const unzipFile = unzippedFile;
         unzippedFile.forEach(function (relativePath, zipEntry) {
-            // console.log("relative path " + relativePath);
-            // console.log("zipentry " + zipEntry)
-
-            // const opfFile = unzippedFile.filter(fileExtension => fileExtension.endsWith(".opf"));
-            // unzippedFile.filter(fileExtension => fileExtension.endsWith(".opf")).async("string").then(function (data) {
-            // console.log("test " + data);
-            // });
-            // console.log(opfFile[0]);
-            // const opfDoc = parser.parseFromString(opfFile, "application/oebps-package+xml");
-            // console.log(opfDoc.querySelector("package"));
             if (zipEntry.name.endsWith(".opf")) {
                 unzippedFile.file(zipEntry.name).async("string").then(function (content) {
                     // let readableContent = parseXhtml(content);
-                    console.log(content);
+                    // console.log(content);
+                    const parser = new DOMParser();
+                    const opfDoc = parser.parseFromString(content, "text/xml");
+                    console.log(opfDoc.querySelector("package"));
+                    const version = parseInt(opfDoc.querySelector("package").getAttribute("version"));
+                    const spine = opfDoc.querySelector("spine");
+                    const manifest = opfDoc.querySelector("manifest");
+                    console.log(version);
+                    console.log(spine);
+                    const spineIds = []
+                    for (const item of spine.querySelectorAll("itemref")) {
+                        spineIds.push(item.getAttribute("idref"));
+                    }
+                    // console.log(spineIds);
+                    const hrefs = []
+                    for (const id of spineIds) {
+                        hrefs.push(manifest.querySelector('item[id=' + id + ']').getAttribute("href"));
+                    }
+                    console.log(hrefs);
+                    switch (version) {
+                        case 3:
+                            // parseEpub3(unzippedFile)
+                            for (const href of hrefs) {
+                                // unzipFile.filter(filename => filename.contains(href));
+                                unzipFile.forEach(function (relativePath, zipEntry) {
+                                    if (zipEntry.name.includes(href)) {
+                                        if (zipEntry.name.endsWith(".xhtml") || zipEntry.name.endsWith(".html")) {
+                                            console.log(zipEntry.name);
+                                            unzipFile.file(zipEntry.name).async("string").then(function (content) {
+                                                let readableContent = parseEpubV3(content);
+                                                console.log(readableContent)
+                                                // console.log(readableContent);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
 
-                    // console.log(zipEntry.name);
-                    // console.log(readableContent);
+                            break;
+                        case 2:
+                            for (const href of hrefs) {
+                                // unzipFile.filter(filename => filename.contains(href));
+                                unzipFile.forEach(function (relativePath, zipEntry) {
+                                    if (zipEntry.name.includes(href)) {
+                                        if (zipEntry.name.endsWith(".xhtml") || zipEntry.name.endsWith(".html")) {
+                                            console.log(zipEntry.name);
+                                            unzipFile.file(zipEntry.name).async("string").then(function (content) {
+                                                let readableContent = parseEpubV3(content);
+                                                console.log(readableContent)
+                                                // console.log(readableContent);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                            break;
+                        default:
+                            break;
+                    }
+
                 });
             };
         });
@@ -47,7 +89,7 @@ function handleSubmitFile(event) {
 };
 
 
-function parseXhtml(xhtmlText) {
+function parseEpubV3(xhtmlText) {
     const parser = new DOMParser();
     const xhtmlDoc = parser.parseFromString(xhtmlText, "application/xhtml+xml");
     const allElements = xhtmlDoc.getElementsByTagName("*");
