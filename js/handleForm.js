@@ -26,13 +26,14 @@ function handleSubmitFile(event) {
                 unzippedFile.file(zipEntry.name).async("string").then(function (content) {
                     const parser = new DOMParser();
                     const opfDoc = parser.parseFromString(content, "text/xml");
-                    console.log(opfDoc.querySelector("package"));
                     const version = parseInt(opfDoc.querySelector("package").getAttribute("version"));
                     const spine = opfDoc.querySelector("spine");
                     const manifest = opfDoc.querySelector("manifest");
+                    const spineIds = []
+                    console.log(opfDoc.querySelector("package"));
                     console.log(version);
                     console.log(spine);
-                    const spineIds = []
+
                     for (const item of spine.querySelectorAll("itemref")) {
                         spineIds.push(item.getAttribute("idref"));
                     }
@@ -40,56 +41,11 @@ function handleSubmitFile(event) {
                     for (const id of spineIds) {
                         hrefs.push(manifest.querySelector('item[id=' + id + ']').getAttribute("href"));
                     }
-                    console.log(hrefs);
-                    switch (version) {
-                        case 3:
-                            for (const href of hrefs) {
-                                unzipFile.forEach(function (relativePath, zipEntry) {
-                                    if (zipEntry.name.includes(href)) {
-                                        if (zipEntry.name.endsWith(".xhtml") || zipEntry.name.endsWith(".html")) {
-                                            console.log(zipEntry.name);
-                                            unzipFile.file(zipEntry.name).async("string").then(function (content) {
-                                                let readableContent = parseEpubV3(content);
-                                                console.log(readableContent)
-                                                // console.log(readableContent);
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                            break;
 
-                        case 2:
-                            for (const href of hrefs) {
-                                unzipFile.forEach(function (relativePath, zipEntry) {
-                                    if (zipEntry.name.includes(href)) {
-                                        if (zipEntry.name.endsWith(".xhtml")) {
-                                            console.log(zipEntry.name);
-                                            unzipFile.file(zipEntry.name).async("string").then(function (content) {
-                                                let readableContent = parseEpubV3(content);
-                                                // check if it contains any character different from whitespace
-                                                if (/\S/.test(readableContent)) {
-                                                    console.log(readableContent);
-                                                }
-                                            });
-                                        }
-                                        if (zipEntry.name.endsWith(".html")) {
-                                            console.log(zipEntry.name);
-                                            unzipFile.file(zipEntry.name).async("string").then(function (content) {
-                                                let readableContent = parseEpubV2(content);
-                                                // check if it contains any character different from whitespace
-                                                if (/\S/.test(readableContent)) {
-                                                    console.log(readableContent);
-                                                }
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                    console.log(hrefs);
+
+                    parseWithVersion(unzipFile,version,hrefs);
+                    
                 });
             };
         });
@@ -107,10 +63,7 @@ function parseEpubV3(xhtmlText) {
     const parser = new DOMParser();
     const xhtmlDoc = parser.parseFromString(xhtmlText, "application/xhtml+xml");
     const allElements = xhtmlDoc.body.getElementsByTagName("*");
-    let readableText = "";
-    for (let i = 0; i < allElements.length; i++) {
-        readableText += allElements[i].textContent + " ";
-    }
+    let readableText = Array.from(allElements).map(el => el.textContent).join(" ");
     return readableText;
 
 }
@@ -119,13 +72,62 @@ function parseEpubV2(htmlText) {
     const parser = new DOMParser();
     const htmlDoc = parser.parseFromString(htmlText, "application/xhtml+xml");
     const allElements = htmlDoc.body.getElementsByTagName("*");
-    let readableText = "";
-    for (let i = 0; i < allElements.length; i++) {
-        readableText += allElements[i].textContent + " ";
-    }
-
+    let readableText = Array.from(allElements).map(el => el.textContent).join(" ");
     return readableText;
 
+}
+
+function parseWithVersion(usableFile, version, hrefs) {
+    switch (version) {
+        case 3:
+            for (const href of hrefs) {
+                usableFile.forEach(function (relativePath, zipEntry) {
+                    if (zipEntry.name.includes(href)) {
+                        if (zipEntry.name.endsWith(".xhtml") || zipEntry.name.endsWith(".html")) {
+                            console.log(zipEntry.name);
+                            usableFile.file(zipEntry.name).async("string").then(function (content) {
+                                let readableContent = parseEpubV3(content);
+                                console.log(readableContent);
+                            });
+                        }
+                    }
+                });
+            }
+            break;
+
+        case 2:
+            for (const href of hrefs) {
+                usableFile.forEach(function (relativePath, zipEntry) {
+                    if (zipEntry.name.includes(href)) {
+
+                        if (zipEntry.name.endsWith(".xhtml")) {
+                            console.log(zipEntry.name);
+                            usableFile.file(zipEntry.name).async("string").then(function (content) {
+                                let readableContent = parseEpubV3(content);
+                                // check if it contains any character different from whitespace
+                                if (/\S/.test(readableContent)) {
+                                    console.log(readableContent);
+                                }
+                            });
+                        }
+
+                        if (zipEntry.name.endsWith(".html")) {
+                            console.log(zipEntry.name);
+                            usableFile.file(zipEntry.name).async("string").then(function (content) {
+                                let readableContent = parseEpubV2(content);
+                                // check if it contains any character different from whitespace
+                                if (/\S/.test(readableContent)) {
+                                    console.log(readableContent);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 
